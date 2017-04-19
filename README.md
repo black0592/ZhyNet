@@ -21,7 +21,7 @@ Net.post("https://xxx.com/xxx.php")<br/>
   }<br/>
 
 
-#Extra Usages:
+# Extra Usages:
 Net.post("https://xxx.com/result.php")<br/>
 .then((result)=>{<br/>
 //something to do<br/>
