@@ -22,15 +22,16 @@ Net.post("https://xxx.com/xxx.php")<br/>
 
 
 #Extra Usages:
-Net.post("https://xxx.com/xxx.php")
-.then((result)=>{
-//something to do
-  return Net.post("https://xxx.com/xxx.php");
-}
-.then((result)=>{
-//something to do
-  return Net.post("https://xxx.com/xxx.php");
-})
-.then((result)=>{
-//something to do
-})
+Net.post("https://xxx.com/result.php")<br/>
+.then((result)=>{<br/>
+//something to do<br/>
+  return Net.post("https://xxx.com/result1.php");<br/>
+}<br/>
+.then((result1)=>{<br/>
+//something to do<br/>
+  return Net.post("https://xxx.com/result2.php");<br/>
+})<br/>
+.then((result2)=>{<br/>
+//something to do<br/>
+});<br/>
+<br/>
