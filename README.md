@@ -19,3 +19,18 @@ Net.post("https://xxx.com/xxx.php")<br/>
   console.log(result);<br/>
   <br/>
   }<br/>
+
+
+#Extra Usages:
+Net.post("https://xxx.com/xxx.php")
+.then((result)=>{
+//something to do
+  return Net.post("https://xxx.com/xxx.php");
+}
+.then((result)=>{
+//something to do
+  return Net.post("https://xxx.com/xxx.php");
+})
+.then((result)=>{
+//something to do
+})
