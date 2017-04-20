@@ -9,8 +9,9 @@ var UA = "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like G
 var Lang = "zh-CN,zh;q=0.8";
 var Accept = "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8";
 var ZhyNet = function () {
+	this.timeout=10000;
 	this.Cookies = [];
-	this.timeout=3000;
+	
 };
 Buffer.prototype.cc = function (b) {
 	return Buffer.concat([this, b], this.length + b.length);
@@ -82,47 +83,55 @@ ZhyNet.prototype.get = function (url, bin, extraheaders) {
 		pro = https;
 	else
 		pro = http;
+	
+	
 	var timeoutID = 0;
 	var options = U.parse(url);
 	if (!extraheaders || !isArray(extraheaders)) {
 		extraheaders = {
-			"Accept": Accept,
-			"Accept-Language": Lang,
-			"Content-Type": "application/x-www-form-urlencoded",
-			"User-Agent": UA
+		
+			"Referer":url
 		};
 
 	}
 
 	options.headers = Object.assign({
 			"Connection": "keep-alive",
-			"Cookie": this.getCookies(),
 			"Host": options.host,
-			"X-Requested-With": "XMLHttpRequest"
+			"X-Requested-With": "XMLHttpRequest",
+			"User-Agent": UA,
+			"Content-Type": "application/x-www-form-urlencoded",
+			"Accept": Accept,
+			"Accept-Language": Lang
 		}, extraheaders);
-
-	options.headers["Cookie"] = this.getCookies();
+	//	console.log(options.headers);
+		if(this.getCookies()!="")
+		options.headers= Object.assign(options.headers,{"Cookie": this.getCookies()});
 	var that = this;
 	return new Promise(function (resolve, reject) {
 		let req = pro.get(options, (res) => {
-
+			
 				let buf = new Buffer(0);
-				res.on("data", (c) => {
-					buf = buf.cc(c)
-				});
-				res.on("error", reject);
-				//res.setTimeout(2000,()=>reject());
-				res.on("end", () => {
+				let end = () => {
 					clearTimeout(timeoutID);
 					that.parseCookieArr(res.headers['set-cookie']);
 					resolve(bin ? buf : (buf.toString()));
+					return;
+				};
+				res.on("data", (c) => {
+					
+					buf = buf.cc(c)
+					
 				});
+				res.on("error", reject);
+				//res.setTimeout(2000,()=>reject());
+				res.on("end",end );
 			});
 
 		timeoutID = setTimeout(() => {
 				req.abort();
 				reject("Timeout");
-			}, this.timeout);
+			}, that.timeout);
 
 		req.on("error", (e) => {
 			reject(e);
@@ -150,21 +159,24 @@ ZhyNet.prototype.post = function (url, data, bin, extraheaders) {
 	options.method = "POST";
 	if (!extraheaders || !isArray(extraheaders)) {
 		extraheaders = {
-			"Accept": Accept,
-			"Accept-Language": Lang,
-			"Content-Type": "application/x-www-form-urlencoded",
-			"User-Agent": UA
+			"Referer":url
+	
 		};
 
 	}
 	options.headers = Object.assign({
 			"Connection": "keep-alive",
-			"Cookie": this.getCookies(),
 			"Host": options.host,
 			"Content-Length": data.length,
-			"X-Requested-With": "XMLHttpRequest"
+			"X-Requested-With": "XMLHttpRequest",
+			"Accept": Accept,
+			"Accept-Language": Lang,
+			"Content-Type": "application/x-www-form-urlencoded",
+			"User-Agent": UA
+			
 		}, extraheaders);
-
+	if(this.getCookies()!="")
+		options.headers= Object.assign(options.headers,{"Cookie": this.getCookies()});
 	var that = this;
 	return new Promise(function (resolve, reject) {
 		let req = pro.request(options, (res) => {
@@ -181,11 +193,10 @@ ZhyNet.prototype.post = function (url, data, bin, extraheaders) {
 					resolve(bin ? buf : (buf.toString() + ""));
 				});
 			});
-
 		timeoutID = setTimeout(() => {
 				req.abort();
 				reject("Timeout");
-			}, this.timeout);
+			}, that.timeout);
 
 		req.on("error", (e) => {
 			reject(e);
